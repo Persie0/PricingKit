@@ -474,6 +474,104 @@ describe('calculateRegionalPrice — rounding modes', () => {
     );
     expect(result.rawPrice).toBeCloseTo(12.34, 2);
   });
+
+  it('round-up-x9: 1.55 → 1.59 (next .x9 ending)', () => {
+    const result = calculateRegionalPrice(
+      1.55,
+      'US',
+      'direct',
+      'round-up-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
+
+  it('round-up-x9: 1.51 → 1.59 (next .x9 ending)', () => {
+    const result = calculateRegionalPrice(
+      1.51,
+      'US',
+      'direct',
+      'round-up-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
+
+  it('round-up-x9: 1.59 → 1.59 (already ending in .x9, no-op)', () => {
+    const result = calculateRegionalPrice(
+      1.59,
+      'US',
+      'direct',
+      'round-up-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
+
+  it('nearest-x9: 1.55 → 1.59 (midpoint, rounds up)', () => {
+    const result = calculateRegionalPrice(
+      1.55,
+      'US',
+      'direct',
+      'nearest-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
+
+  it('nearest-x9: 1.54 → 1.59 (rounds up)', () => {
+    const result = calculateRegionalPrice(
+      1.54,
+      'US',
+      'direct',
+      'nearest-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
+
+  it('nearest-x9: 1.53 → 1.49 (rounds down)', () => {
+    const result = calculateRegionalPrice(
+      1.53,
+      'US',
+      'direct',
+      'nearest-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.49);
+  });
+
+  it('nearest-x9: 1.59 → 1.59 (exact match)', () => {
+    const result = calculateRegionalPrice(
+      1.59,
+      'US',
+      'direct',
+      'nearest-x9',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES
+    );
+    expect(result.rawPrice).toBe(1.59);
+  });
 });
 
 describe('calculateRegionalPrice — unknown / fallback regions', () => {
