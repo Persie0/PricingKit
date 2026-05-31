@@ -988,6 +988,30 @@ export function BulkPricingModal({
                 />
                 <span className="text-sm">Nearest .99</span>
               </label>
+              {platform === 'google' && (
+                <>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="rounding"
+                      value="nearest-x9"
+                      checked={rounding === 'nearest-x9'}
+                      onChange={() => setRounding('nearest-x9')}
+                    />
+                    <span className="text-sm">Nearest .x9</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="rounding"
+                      value="round-up-x9"
+                      checked={rounding === 'round-up-x9'}
+                      onChange={() => setRounding('round-up-x9')}
+                    />
+                    <span className="text-sm">Round up to .x9</span>
+                  </label>
+                </>
+              )}
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
@@ -1013,6 +1037,8 @@ export function BulkPricingModal({
               {rounding === 'nearest-tier' && 'Snaps to the closest Apple tier price.'}
               {rounding === 'nearest-99' && 'Closest .99 ending by absolute distance.'}
               {rounding === 'round-up' && 'Always rounds up to the next .99 ending.'}
+              {rounding === 'nearest-x9' && 'Closest .x9 ending (e.g. 1.55 to 1.59, 1.53 to 1.49).'}
+              {rounding === 'round-up-x9' && 'Always rounds up to the next .x9 ending (e.g. 1.55 to 1.59).'}
               {rounding === 'none' && 'Use the calculated value as-is.'}
             </p>
           </div>

@@ -8,7 +8,7 @@ import { FALLBACK_EXCHANGE_RATES } from '../conversion-indexes/exchange-rates';
 import { alpha3ToAlpha2 } from '../apple-connect/territories';
 
 export type PricingStrategy = 'direct' | 'ppp' | 'bigmac' | 'netflix' | 'custom';
-export type RoundingMode = 'nearest-tier' | 'nearest-99' | 'round-up' | 'none';
+export type RoundingMode = 'nearest-tier' | 'nearest-99' | 'round-up' | 'nearest-x9' | 'round-up-x9' | 'none';
 
 export interface RoundingTier {
   price: number;
@@ -27,8 +27,8 @@ export interface DynamicExchangeRates {
 
 
 // Convert a region code to alpha-2 format (handles both alpha-2 and alpha-3)
+// If it's 3 characters, try to convert from alpha-3 to alpha-2
 function toAlpha2(regionCode: string): string {
-  // If it's 3 characters, try to convert from alpha-3 to alpha-2
   if (regionCode.length === 3) {
     const alpha2 = alpha3ToAlpha2(regionCode);
     return alpha2 || regionCode;
@@ -137,6 +137,58 @@ function applyRounding(
     const nextWhole = Math.ceil(price);
     const result = nextWhole - 0.01;
     return result < 0.99 ? 0.99 : result;
+  }
+
+  // Round up to next .x9 ending (or platform-equivalent for no-decimal currencies).
+  if (mode === 'round-up-x9') {
+    if (isCfaFranc) {
+      return Math.ceil(price / 100) * 100;
+    }
+    if (isNoDecimal) {
+      if (price >= 1000) {
+        const next90 = Math.ceil((price + 10) / 100) * 100 - 10;
+        return next90 < 90 ? 90 : next90;
+      } else if (price >= 100) {
+        const next9 = Math.ceil((price + 1) / 10) * 10 - 1;
+        return next9 < 9 ? 9 : next9;
+      }
+      return Math.ceil(price);
+    }
+    const cents = Math.round(price * 100);
+    const lastDigit = cents % 10;
+    const diff = (9 - lastDigit + 10) % 10;
+    const roundedCents = cents + diff;
+    const result = roundedCents / 100;
+    return result < 0.09 ? 0.09 : result;
+  }
+
+  // 'nearest-x9' (closest .x9 ending by absolute distance).
+  if (mode === 'nearest-x9') {
+    if (isCfaFranc) {
+      return Math.round(price / 100) * 100;
+    }
+    if (isNoDecimal) {
+      if (price >= 1000) {
+        const closest90 = Math.round((price + 10) / 100) * 100 - 10;
+        return closest90 < 90 ? 90 : closest90;
+      } else if (price >= 100) {
+        const closest9 = Math.round((price + 1) / 10) * 10 - 1;
+        return closest9 < 9 ? 9 : closest9;
+      }
+      return Math.round(price);
+    }
+    const cents = Math.round(price * 100);
+    const lastDigit = cents % 10;
+
+    const diffUp = (9 - lastDigit + 10) % 10;
+    const upCents = cents + diffUp;
+
+    const diffDown = (lastDigit + 1) % 10;
+    const downCents = cents - diffDown;
+
+    const roundedCents = (upCents - cents) <= (cents - downCents) ? upCents : downCents;
+    const result = roundedCents / 100;
+    return result < 0.09 ? 0.09 : result;
   }
 
   // 'nearest-99' (and the fallthrough from 'nearest-tier' with no tiers).
