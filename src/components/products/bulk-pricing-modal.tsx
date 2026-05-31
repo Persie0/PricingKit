@@ -127,7 +127,7 @@ export function BulkPricingModal({
     '_appleProduct' in product &&
     (product as ProductWithApple)._appleProduct !== undefined;
   const platform: 'apple' | 'google' = isAppleProduct ? 'apple' : 'google';
-  const { data: appPrice } = useAppleAppPrice();
+  const { data: appPrice } = useAppleAppPrice(platform === 'apple');
 
   // Initial base region: app-level (Apple) → per-product → 'USA' / 'US'.
   const initialBaseRegion = useMemo(() => {
