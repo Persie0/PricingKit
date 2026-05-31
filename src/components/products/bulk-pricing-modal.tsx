@@ -167,7 +167,7 @@ export function BulkPricingModal({
     if (platform === 'apple') {
       return getTerritoryByAlpha3(baseRegion)?.currency || 'USD';
     }
-    return 'USD'; // Google base is always 'US' for now
+    return GOOGLE_PLAY_REGIONS.find((r) => r.code === baseRegion)?.currency || 'USD';
   }, [platform, baseRegion]);
 
   // Available USD tiers for Apple tier mode (Phase 1: USD only).
@@ -804,7 +804,7 @@ export function BulkPricingModal({
                       ))
                     : GOOGLE_PLAY_REGIONS.map((r) => (
                         <SelectItem key={r.code} value={r.code}>
-                          {r.code} — {r.name}
+                          {r.code} — {r.name} ({r.currency})
                         </SelectItem>
                       ))}
                 </SelectContent>
