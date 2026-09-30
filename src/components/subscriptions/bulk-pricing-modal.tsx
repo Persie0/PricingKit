@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Calculator, Globe, TrendingDown, Sliders, RefreshCw, Hamburger, Tv, Loader2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+import { Calculator, Globe, TrendingDown, Sliders, RefreshCw, Hamburger, Tv, Sparkles, Loader2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,7 +100,7 @@ export function SubscriptionBulkPricingModal({
 }: SubscriptionBulkPricingModalProps) {
   const [basePrice, setBasePrice] = useState<string>('');
   const [baseRegion, setBaseRegion] = useState<string>('US');
-  const [strategy, setStrategy] = useState<PricingStrategy>('ppp');
+  const [strategy, setStrategy] = useState<PricingStrategy>('smart');
   const [rounding, setRounding] = useState<RoundingMode>('nearest-99');
   const [selectedRegions, setSelectedRegions] = useState<Set<string>>(new Set());
 
@@ -504,7 +504,7 @@ export function SubscriptionBulkPricingModal({
         : (firstConfig?.price ? moneyToNumber(firstConfig.price).toString() : '');
 
       setBasePrice(initialPrice);
-      setStrategy('ppp');
+      setStrategy('smart');
       setRounding('nearest-99');
       setHasInitializedSelection(false);
     }
@@ -577,7 +577,7 @@ export function SubscriptionBulkPricingModal({
               )}
             </div>
             <TooltipProvider delayDuration={200}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
@@ -628,6 +628,55 @@ export function SubscriptionBulkPricingModal({
                 </Tooltip>
 
                 <Tooltip>
+
+                  <TooltipTrigger asChild>
+
+                    <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+
+                      <input
+
+                        type="radio"
+
+                        name="strategy"
+
+                        value="smart"
+
+                        checked={strategy === 'smart'}
+
+                        onChange={() => setStrategy('smart')}
+
+                        className="sr-only"
+
+                      />
+
+                      <Sparkles className="h-4 w-4 shrink-0" />
+
+                      <span className="text-sm font-medium truncate">Smart</span>
+
+                    </label>
+
+                  </TooltipTrigger>
+
+                  <TooltipContent side="bottom" className="max-w-sm">
+
+                    <p className="font-medium">Smart App-Market (Recommended)</p>
+
+                    <p className="text-xs text-muted-foreground">
+
+                        Revenue-oriented app pricing: compressed PPP plus mobile-market and
+
+                        platform priors. Google Play receives more aggressive emerging-market
+
+                        discounts than iOS, matching observed subscription-market behavior.
+
+                    </p>
+
+                  </TooltipContent>
+
+                </Tooltip>
+
+
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <label className="flex items-center gap-2 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                       <input
@@ -643,10 +692,10 @@ export function SubscriptionBulkPricingModal({
                     </label>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
-                    <p className="font-medium">PPP-Adjusted (Recommended)</p>
+                    <p className="font-medium">Raw World Bank PPP</p>
                     <p className="text-xs text-muted-foreground">
-                      Lower prices for lower-income regions based on World Bank purchasing power parity data.
-                      Hyperinflation regions automatically receive reduced prices for affordability.
+                      Population-wide purchasing power. Useful as a raw reference, but it can
+                      over-discount the subset of users who pay for apps.
                     </p>
                     {pppMetadata && pppMetadata.worldBankRegions > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -918,6 +967,7 @@ export function SubscriptionBulkPricingModal({
                                 </TooltipTrigger>
                                 <TooltipContent side="top">
                                   <p className="text-xs">
+                                    {calculated.multiplierSource === 'app-market' && 'Smart app-market model'}
                                     {calculated.multiplierSource === 'world-bank' && 'World Bank PPP data'}
                                     {calculated.multiplierSource === 'big-mac' && 'Big Mac Index'}
                                     {calculated.multiplierSource === 'netflix' && 'Netflix Price Index'}

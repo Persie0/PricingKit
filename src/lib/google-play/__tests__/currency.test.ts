@@ -357,6 +357,95 @@ describe('calculateRegionalPrice — rounding modes', () => {
     expect(result.rawPrice).toBe(1.49);
   });
 
+  it('nearest-tier prefers 17.99 over 18.00 for a 17.9955 USD target', () => {
+    const result = calculateRegionalPrice(
+      17.9955,
+      'US',
+      'direct',
+      'nearest-tier',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES,
+      'USD',
+      'US',
+      () => [
+        { price: 17.49 },
+        { price: 17.99 },
+        { price: 18.00 },
+        { price: 18.49 },
+      ]
+    );
+
+    expect(result.rawPrice).toBe(17.99);
+  });
+
+  it('nearest-tier converts exact 18.00 to 17.99 for consumer pricing', () => {
+    const result = calculateRegionalPrice(
+      18,
+      'US',
+      'direct',
+      'nearest-tier',
+      undefined,
+      TEST_PPP_DATA,
+      undefined,
+      TEST_EXCHANGE_RATES,
+      'USD',
+      'US',
+      () => [
+        { price: 17.99 },
+        { price: 18.00 },
+        { price: 18.49 },
+      ]
+    );
+
+    expect(result.rawPrice).toBe(17.99);
+  });
+
+  it('nearest-tier converts 31.20 to 31.19', () => {
+    const result = calculateRegionalPrice(
+      31.20, 'US', 'direct', 'nearest-tier',
+      undefined, TEST_PPP_DATA, undefined, TEST_EXCHANGE_RATES,
+      'USD', 'US',
+      () => [{ price: 31.19 }, { price: 31.20 }, { price: 31.49 }]
+    );
+
+    expect(result.rawPrice).toBe(31.19);
+  });
+
+  it('nearest-tier converts 31.50 to 31.49', () => {
+    const result = calculateRegionalPrice(
+      31.50, 'US', 'direct', 'nearest-tier',
+      undefined, TEST_PPP_DATA, undefined, TEST_EXCHANGE_RATES,
+      'USD', 'US',
+      () => [{ price: 31.49 }, { price: 31.50 }, { price: 31.99 }]
+    );
+
+    expect(result.rawPrice).toBe(31.49);
+  });
+
+  it('nearest-tier converts 31.90 to 31.99', () => {
+    const result = calculateRegionalPrice(
+      31.90, 'US', 'direct', 'nearest-tier',
+      undefined, TEST_PPP_DATA, undefined, TEST_EXCHANGE_RATES,
+      'USD', 'US',
+      () => [{ price: 31.89 }, { price: 31.90 }, { price: 31.99 }]
+    );
+
+    expect(result.rawPrice).toBe(31.99);
+  });
+
+  it('nearest-tier converts 31.95 to 31.99', () => {
+    const result = calculateRegionalPrice(
+      31.95, 'US', 'direct', 'nearest-tier',
+      undefined, TEST_PPP_DATA, undefined, TEST_EXCHANGE_RATES,
+      'USD', 'US',
+      () => [{ price: 31.90 }, { price: 31.95 }, { price: 31.99 }]
+    );
+
+    expect(result.rawPrice).toBe(31.99);
+  });
+
   it('nearest-tier without tiers falls back to nearest-99', () => {
     const result = calculateRegionalPrice(
       2.99,
